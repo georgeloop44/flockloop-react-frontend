@@ -3,42 +3,7 @@ import { useCampaigns } from "@flockloop/api-client";
 import { StatsCardRow } from "@/components/dashboard/StatsCardRow";
 import { TopPerformingTrack } from "@/components/dashboard/TopPerformingTrack";
 import { CampaignBudgetCard } from "@/components/dashboard/CampaignBudgetCard";
-import {
-  TopCreatorSubmissions,
-  type CreatorSubmission,
-} from "@/components/dashboard/TopCreatorSubmissions";
-
-// Placeholder data — will be replaced with real API data when backend supports it
-const placeholderCreators: CreatorSubmission[] = [
-  {
-    id: "1",
-    name: "user_frenzy_34",
-    avatarUrl: null,
-    trackTitle: "The Clouds in Camarillo",
-    reach: 23_543_567_543,
-  },
-  {
-    id: "2",
-    name: "Erika Sanchez",
-    avatarUrl: null,
-    trackTitle: "The Clouds in Camarillo",
-    reach: 1_345_323,
-  },
-  {
-    id: "3",
-    name: "Someone98",
-    avatarUrl: null,
-    trackTitle: "The Clouds in Camarillo",
-    reach: 4_653,
-  },
-  {
-    id: "4",
-    name: "Manolo",
-    avatarUrl: null,
-    trackTitle: "The Clouds in Camarillo",
-    reach: 1_200,
-  },
-];
+import { TopCreatorSubmissions } from "@/components/dashboard/TopCreatorSubmissions";
 
 function OverviewContent() {
   const { data: campaigns } = useCampaigns();
@@ -48,16 +13,12 @@ function OverviewContent() {
 
   return (
     <div className="flex flex-col gap-4 p-6">
-      {/* Stats row */}
+      {/* Stats row — zeroed out until backend analytics API is available */}
       <StatsCardRow
-        totalReach={1_654_765}
-        tiktokReach={3_564}
-        instagramReach={2_645}
-        youtubeReach={2_645}
-        totalTrend={20}
-        tiktokTrend={20}
-        instagramTrend={20}
-        youtubeTrend={-20}
+        totalReach={0}
+        tiktokReach={0}
+        instagramReach={0}
+        youtubeReach={0}
       />
 
       {/* Two-column layout */}
@@ -68,17 +29,17 @@ function OverviewContent() {
           artist={topTrack?.artist ?? "\u2014"}
           genres={campaigns[0]?.genres ?? []}
           thumbnailUrl={topTrack?.thumbnail_url ?? null}
-          totalViews={1_345_654}
-          creatorCount={145}
+          totalViews={0}
+          creatorCount={0}
         />
 
         {/* Right: Budget + Creators */}
         <div className="flex flex-col gap-4">
           <CampaignBudgetCard
             activeCampaigns={campaigns.length}
-            budgetAvailable={40}
+            budgetAvailable={0}
           />
-          <TopCreatorSubmissions creators={placeholderCreators} />
+          <TopCreatorSubmissions creators={[]} />
         </div>
       </div>
     </div>

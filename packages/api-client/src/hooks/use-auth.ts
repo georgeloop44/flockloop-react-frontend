@@ -23,23 +23,28 @@ export function useMe() {
 }
 
 export function useLogin() {
-  const setAuth = useAuthStore((s) => s.setAuth);
   return useMutation({
     mutationFn: async (data: LoginRequest) => {
       const tokenResponse = await authApi.login(data);
       // Store tokens before fetching profile so the request interceptor can attach it
       useAuthStore
         .getState()
-        .setAuth(tokenResponse.access_token, tokenResponse.refresh_token, null);
-      const user = await authApi.me();
-      return {
-        token: tokenResponse.access_token,
-        refreshToken: tokenResponse.refresh_token,
-        user,
-      };
+        .setTokens(tokenResponse.access_token, tokenResponse.refresh_token);
+      try {
+        const user = await authApi.me();
+        return {
+          token: tokenResponse.access_token,
+          refreshToken: tokenResponse.refresh_token,
+          user,
+        };
+      } catch (e) {
+        // Roll back partial auth state if profile fetch fails
+        useAuthStore.getState().logout();
+        throw e;
+      }
     },
     onSuccess: ({ token, refreshToken, user }) => {
-      setAuth(token, refreshToken, user);
+      useAuthStore.getState().setAuth(token, refreshToken, user);
     },
   });
 }

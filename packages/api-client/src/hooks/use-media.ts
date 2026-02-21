@@ -1,4 +1,4 @@
-import { queryOptions, useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, skipToken, useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { mediaApi } from "../endpoints/media";
 import type { UploadRequest, MediaType } from "@flockloop/shared-types";
 import { useState } from "react";
@@ -7,8 +7,7 @@ export const mediaOptions = {
   downloadUrl: (mediaId: string) =>
     queryOptions({
       queryKey: ["media", "download-url", mediaId],
-      queryFn: () => mediaApi.getDownloadUrl(mediaId),
-      enabled: !!mediaId,
+      queryFn: mediaId ? () => mediaApi.getDownloadUrl(mediaId) : skipToken,
       staleTime: 1000 * 60 * 30, // 30 min (presigned URLs expire in 1hr)
     }),
 };

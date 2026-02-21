@@ -33,21 +33,25 @@ function StatCard({ label, value, trend, icon }: StatCard) {
       <p className="text-2xl font-semibold tabular-nums text-foreground">
         {value}
       </p>
-      <div className="mt-1 flex items-center gap-1">
-        {isPositive ? (
-          <TrendingUp className="h-3 w-3 text-accent" aria-hidden="true" />
-        ) : (
-          <TrendingDown className="h-3 w-3 text-destructive" aria-hidden="true" />
-        )}
-        <span
-          className={cn(
-            "text-xs tabular-nums",
-            isPositive ? "text-accent" : "text-destructive",
+      {trend !== 0 ? (
+        <div className="mt-1 flex items-center gap-1">
+          {isPositive ? (
+            <TrendingUp className="h-3 w-3 text-accent" aria-hidden="true" />
+          ) : (
+            <TrendingDown className="h-3 w-3 text-destructive" aria-hidden="true" />
           )}
-        >
-          {isPositive ? "\u2197" : "\u2198"} {Math.abs(trend)}%
-        </span>
-      </div>
+          <span
+            className={cn(
+              "text-xs tabular-nums",
+              isPositive ? "text-accent" : "text-destructive",
+            )}
+          >
+            {isPositive ? "\u2197" : "\u2198"} {Math.abs(trend)}%
+          </span>
+        </div>
+      ) : (
+        <p className="mt-1 text-xs text-foreground-muted">No trend data yet</p>
+      )}
     </div>
   );
 }
@@ -93,10 +97,10 @@ export function StatsCardRow({
   tiktokReach,
   instagramReach,
   youtubeReach,
-  totalTrend = 20,
-  tiktokTrend = 20,
-  instagramTrend = 20,
-  youtubeTrend = -20,
+  totalTrend = 0,
+  tiktokTrend = 0,
+  instagramTrend = 0,
+  youtubeTrend = 0,
 }: StatsCardRowProps) {
   return (
     <div className="flex gap-4">

@@ -1,5 +1,6 @@
 import {
   queryOptions,
+  skipToken,
   useMutation,
   useQueryClient,
   useSuspenseQuery,
@@ -19,8 +20,9 @@ export const submissionOptions = {
   byCampaign: (campaignId: string) =>
     queryOptions({
       queryKey: ["submissions", "campaign", campaignId],
-      queryFn: () => submissionsApi.listByCampaign(campaignId),
-      enabled: !!campaignId,
+      queryFn: campaignId
+        ? () => submissionsApi.listByCampaign(campaignId)
+        : skipToken,
     }),
 };
 

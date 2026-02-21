@@ -1,12 +1,12 @@
 import { Suspense, useState, useCallback, useEffect } from "react";
 import { useTracks } from "@flockloop/api-client";
 import { mediaApi } from "@flockloop/api-client";
-import { useAudioStore, setSkipCallbacks } from "@flockloop/audio-state";
+import { useAudioStore, setSkipCallbacks, audioLoadAndPlay } from "@flockloop/audio-state";
 import type { TrackRead } from "@flockloop/shared-types";
 import type { AudioTrack } from "@flockloop/audio-state";
-import { useAudioPlayer } from "@/hooks/use-audio-player";
 import { Plus, Play, Pause, Disc3 } from "lucide-react";
 import { UploadTrackDialog } from "@/components/tracks/UploadTrackDialog";
+import { toast } from "sonner";
 
 function TrackRow({
   track,
@@ -69,7 +69,6 @@ function TrackRow({
 function MyTracksContent() {
   const { data: tracks } = useTracks();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { loadAndPlay, seek } = useAudioPlayer();
 
   const currentTrack = useAudioStore((s) => s.currentTrack);
   const isPlaying = useAudioStore((s) => s.isPlaying);
@@ -88,18 +87,22 @@ function MyTracksContent() {
         return;
       }
 
-      // Fetch presigned download URL then play
-      const { download_url } = await mediaApi.getDownloadUrl(track.media_id);
-      const audioTrack: AudioTrack = {
-        trackId: track.id,
-        title: track.title,
-        artist: track.artist,
-        thumbnailUrl: track.thumbnail_url,
-        mediaId: track.media_id,
-      };
-      loadAndPlay(audioTrack, download_url);
+      try {
+        // Fetch presigned download URL then play
+        const { download_url } = await mediaApi.getDownloadUrl(track.media_id);
+        const audioTrack: AudioTrack = {
+          trackId: track.id,
+          title: track.title,
+          artist: track.artist,
+          thumbnailUrl: track.thumbnail_url,
+          mediaId: track.media_id,
+        };
+        audioLoadAndPlay(audioTrack, download_url);
+      } catch {
+        toast.error("Failed to load track. Please try again.");
+      }
     },
-    [currentTrack?.trackId, isPlaying, pause, resume, loadAndPlay],
+    [currentTrack?.trackId, isPlaying, pause, resume],
   );
 
   // Set up skip callbacks for the BottomAudioPlayer
@@ -124,15 +127,6 @@ function MyTracksContent() {
       },
     );
   }, [tracks, playTrack]);
-
-  // Listen for seek events from BottomAudioPlayer
-  useEffect(() => {
-    const handler = (e: Event) => {
-      seek((e as CustomEvent<number>).detail);
-    };
-    window.addEventListener("flockloop:seek", handler);
-    return () => window.removeEventListener("flockloop:seek", handler);
-  }, [seek]);
 
   return (
     <div className="p-6">

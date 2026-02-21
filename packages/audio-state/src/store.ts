@@ -37,6 +37,32 @@ export function setSkipCallbacks(next: () => void, previous: () => void) {
   onSkipPrevious = previous;
 }
 
+// Callbacks for audio playback — set once by the AudioManager in AppShell
+let onLoadAndPlay: ((track: AudioTrack, url: string) => void) | null = null;
+let onSeek: ((time: number) => void) | null = null;
+
+export function setAudioPlayerCallbacks(callbacks: {
+  loadAndPlay: (track: AudioTrack, url: string) => void;
+  seek: (time: number) => void;
+}) {
+  onLoadAndPlay = callbacks.loadAndPlay;
+  onSeek = callbacks.seek;
+  return () => {
+    onLoadAndPlay = null;
+    onSeek = null;
+  };
+}
+
+/** Load a track and start playback. Call from any page. */
+export function audioLoadAndPlay(track: AudioTrack, url: string) {
+  onLoadAndPlay?.(track, url);
+}
+
+/** Seek to a specific time (seconds). Call from any component. */
+export function audioSeek(time: number) {
+  onSeek?.(time);
+}
+
 export const useAudioStore = create<AudioState & AudioActions>()((set) => ({
   currentTrack: null,
   isPlaying: false,

@@ -1,5 +1,6 @@
 import {
   queryOptions,
+  skipToken,
   useMutation,
   useQueryClient,
   useSuspenseQuery,
@@ -16,8 +17,7 @@ export const trackOptions = {
   detail: (id: string) =>
     queryOptions({
       queryKey: ["tracks", id],
-      queryFn: () => tracksApi.get(id),
-      enabled: !!id,
+      queryFn: id ? () => tracksApi.get(id) : skipToken,
     }),
 };
 

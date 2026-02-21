@@ -1,13 +1,12 @@
 import { useState, useCallback, useMemo, useEffect, Suspense } from "react";
 import { useCampaigns } from "@flockloop/api-client";
-import { useAudioStore, setSkipCallbacks } from "@flockloop/audio-state";
+import { useAudioStore, setSkipCallbacks, audioLoadAndPlay } from "@flockloop/audio-state";
 import type { CampaignRead } from "@flockloop/shared-types";
 import type { AudioTrack } from "@flockloop/audio-state";
 import type { ColumnFiltersState } from "@tanstack/react-table";
 import { CampaignTable } from "@/components/campaigns/CampaignTable";
 import { CampaignDetailPanel } from "@/components/campaigns/CampaignDetailPanel";
 import { CampaignFilters } from "@/components/campaigns/CampaignFilters";
-import { useAudioPlayer } from "@/hooks/use-audio-player";
 
 function campaignToAudioTrack(campaign: CampaignRead): AudioTrack {
   return {
@@ -25,22 +24,10 @@ function DiscoverContent() {
   const [genreFilter, setGenreFilter] = useState("");
   const [platformFilter, setPlatformFilter] = useState("");
 
-  const { loadAndPlay } = useAudioPlayer();
   const currentTrackId = useAudioStore((s) => s.currentTrack?.trackId);
   const isPlaying = useAudioStore((s) => s.isPlaying);
   const pause = useAudioStore((s) => s.pause);
   const resume = useAudioStore((s) => s.resume);
-
-  // Listen for seek events from the BottomAudioPlayer
-  const audioPlayer = useAudioPlayer();
-  useEffect(() => {
-    function handleSeek(e: Event) {
-      const time = (e as CustomEvent<number>).detail;
-      audioPlayer.seek(time);
-    }
-    window.addEventListener("flockloop:seek", handleSeek);
-    return () => window.removeEventListener("flockloop:seek", handleSeek);
-  }, [audioPlayer]);
 
   const selectedCampaign = useMemo(
     () => campaigns.find((c) => c.id === selectedId) ?? null,
@@ -81,7 +68,7 @@ function DiscoverContent() {
         const next = campaigns[(idx + 1) % campaigns.length];
         if (next) {
           setSelectedId(next.id);
-          loadAndPlay(campaignToAudioTrack(next), "");
+          audioLoadAndPlay(campaignToAudioTrack(next), "");
         }
       },
       () => {
@@ -90,11 +77,11 @@ function DiscoverContent() {
         const prev = campaigns[(idx - 1 + campaigns.length) % campaigns.length];
         if (prev) {
           setSelectedId(prev.id);
-          loadAndPlay(campaignToAudioTrack(prev), "");
+          audioLoadAndPlay(campaignToAudioTrack(prev), "");
         }
       },
     );
-  }, [campaigns, currentTrackId, loadAndPlay]);
+  }, [campaigns, currentTrackId]);
 
   const handleSelect = useCallback((campaign: CampaignRead) => {
     setSelectedId(campaign.id);
@@ -110,11 +97,10 @@ function DiscoverContent() {
       } else {
         setSelectedId(campaign.id);
         // TODO: fetch presigned download URL for the track's media_id
-        // For now, we just set the track in the audio store
-        loadAndPlay(campaignToAudioTrack(campaign), "");
+        audioLoadAndPlay(campaignToAudioTrack(campaign), "");
       }
     },
-    [currentTrackId, isPlaying, pause, resume, loadAndPlay],
+    [currentTrackId, isPlaying, pause, resume],
   );
 
   const handleCreateAndEarn = useCallback((_campaign: CampaignRead) => {

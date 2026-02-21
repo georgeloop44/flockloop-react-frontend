@@ -1,4 +1,4 @@
-import { useAudioStore } from "@flockloop/audio-state";
+import { useAudioStore, audioSeek } from "@flockloop/audio-state";
 import { SkipBack, Play, Pause, SkipForward } from "lucide-react";
 
 function formatTime(seconds: number): string {
@@ -100,12 +100,7 @@ export function BottomAudioPlayer() {
           step={0.1}
           value={currentTime}
           onChange={(e) => {
-            // seek is provided by the page-level audio player hook
-            // We dispatch a custom event that the hook listens to
-            const time = Number(e.target.value);
-            window.dispatchEvent(
-              new CustomEvent("flockloop:seek", { detail: time }),
-            );
+            audioSeek(Number(e.target.value));
           }}
           className="absolute inset-0 h-1 w-full cursor-pointer opacity-0"
           aria-label="Seek"

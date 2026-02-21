@@ -1,2 +1,8 @@
-export { useAudioStore, setSkipCallbacks } from "./store";
+export {
+  useAudioStore,
+  setSkipCallbacks,
+  setAudioPlayerCallbacks,
+  audioLoadAndPlay,
+  audioSeek,
+} from "./store";
 export type { AudioTrack } from "./store";
