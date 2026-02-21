@@ -74,6 +74,10 @@ function MyTracksContent() {
   const isPlaying = useAudioStore((s) => s.isPlaying);
   const pause = useAudioStore((s) => s.pause);
   const resume = useAudioStore((s) => s.resume);
+  const stop = useAudioStore((s) => s.stop);
+
+  // Stop audio when leaving the page
+  useEffect(() => () => { stop(); }, [stop]);
 
   const playTrack = useCallback(
     async (track: TrackRead) => {

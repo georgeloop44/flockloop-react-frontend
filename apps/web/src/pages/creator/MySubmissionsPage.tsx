@@ -1,5 +1,5 @@
-import { Suspense } from "react";
-import { useMySubmissions } from "@flockloop/api-client";
+import { Suspense, useMemo } from "react";
+import { useMySubmissions, useCampaigns } from "@flockloop/api-client";
 import type { SubmissionRead } from "@flockloop/shared-types";
 import { cn } from "@/lib/utils";
 import { Clock, CheckCircle, XCircle, Inbox } from "lucide-react";
@@ -41,6 +41,15 @@ function StatusBadge({ status }: { status: SubmissionRead["status"] }) {
 
 function SubmissionsContent() {
   const { data: submissions } = useMySubmissions();
+  const { data: campaigns } = useCampaigns();
+
+  const campaignNames = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const c of campaigns) {
+      map.set(c.id, c.name);
+    }
+    return map;
+  }, [campaigns]);
 
   if (submissions.length === 0) {
     return (
@@ -80,7 +89,7 @@ function SubmissionsContent() {
             >
               <td className="px-4 py-3">
                 <span className="text-sm font-medium text-foreground">
-                  {submission.campaign_id}
+                  {campaignNames.get(submission.campaign_id) ?? submission.campaign_id}
                 </span>
               </td>
               <td className="px-4 py-3">

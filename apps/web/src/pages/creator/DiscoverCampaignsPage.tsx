@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useEffect, Suspense } from "react";
-import { useCampaigns } from "@flockloop/api-client";
+import { useCampaigns, tracksApi, mediaApi } from "@flockloop/api-client";
 import { useAudioStore, setSkipCallbacks, audioLoadAndPlay } from "@flockloop/audio-state";
 import type { CampaignRead } from "@flockloop/shared-types";
 import type { AudioTrack } from "@flockloop/audio-state";
@@ -7,6 +7,7 @@ import type { ColumnFiltersState } from "@tanstack/react-table";
 import { CampaignTable } from "@/components/campaigns/CampaignTable";
 import { CampaignDetailPanel } from "@/components/campaigns/CampaignDetailPanel";
 import { CampaignFilters } from "@/components/campaigns/CampaignFilters";
+import { toast } from "sonner";
 
 function campaignToAudioTrack(campaign: CampaignRead): AudioTrack {
   return {
@@ -28,6 +29,10 @@ function DiscoverContent() {
   const isPlaying = useAudioStore((s) => s.isPlaying);
   const pause = useAudioStore((s) => s.pause);
   const resume = useAudioStore((s) => s.resume);
+  const stop = useAudioStore((s) => s.stop);
+
+  // Stop audio when leaving the page
+  useEffect(() => () => { stop(); }, [stop]);
 
   const selectedCampaign = useMemo(
     () => campaigns.find((c) => c.id === selectedId) ?? null,
@@ -59,6 +64,21 @@ function DiscoverContent() {
     return filters;
   }, [genreFilter, platformFilter]);
 
+  // Fetch presigned URL and start playback
+  const fetchAndPlay = useCallback(
+    async (campaign: CampaignRead) => {
+      setSelectedId(campaign.id);
+      try {
+        const track = await tracksApi.get(campaign.track.id);
+        const { download_url } = await mediaApi.getDownloadUrl(track.media_id);
+        audioLoadAndPlay(campaignToAudioTrack(campaign), download_url);
+      } catch {
+        toast.error("Failed to load track. Please try again.");
+      }
+    },
+    [],
+  );
+
   // Skip next/previous callbacks for playlist navigation
   useEffect(() => {
     setSkipCallbacks(
@@ -66,22 +86,16 @@ function DiscoverContent() {
         if (!campaigns.length) return;
         const idx = campaigns.findIndex((c) => c.track.id === currentTrackId);
         const next = campaigns[(idx + 1) % campaigns.length];
-        if (next) {
-          setSelectedId(next.id);
-          audioLoadAndPlay(campaignToAudioTrack(next), "");
-        }
+        if (next) fetchAndPlay(next);
       },
       () => {
         if (!campaigns.length) return;
         const idx = campaigns.findIndex((c) => c.track.id === currentTrackId);
         const prev = campaigns[(idx - 1 + campaigns.length) % campaigns.length];
-        if (prev) {
-          setSelectedId(prev.id);
-          audioLoadAndPlay(campaignToAudioTrack(prev), "");
-        }
+        if (prev) fetchAndPlay(prev);
       },
     );
-  }, [campaigns, currentTrackId]);
+  }, [campaigns, currentTrackId, fetchAndPlay]);
 
   const handleSelect = useCallback((campaign: CampaignRead) => {
     setSelectedId(campaign.id);
@@ -95,12 +109,10 @@ function DiscoverContent() {
       } else if (isCurrentTrack) {
         resume();
       } else {
-        setSelectedId(campaign.id);
-        // TODO: fetch presigned download URL for the track's media_id
-        audioLoadAndPlay(campaignToAudioTrack(campaign), "");
+        fetchAndPlay(campaign);
       }
     },
-    [currentTrackId, isPlaying, pause, resume],
+    [currentTrackId, isPlaying, pause, resume, fetchAndPlay],
   );
 
   const handleCreateAndEarn = useCallback((_campaign: CampaignRead) => {
