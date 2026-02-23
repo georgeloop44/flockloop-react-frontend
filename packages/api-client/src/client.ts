@@ -106,7 +106,7 @@ apiClient.interceptors.response.use(
         token_type: string;
       }>(`${apiClient.defaults.baseURL}/auth/refresh`, {
         refresh_token: refreshToken,
-      });
+      }, { timeout: 10_000 });
 
       useAuthStore.getState().setTokens(data.access_token, data.refresh_token);
       processPendingQueue(data.access_token, null);
