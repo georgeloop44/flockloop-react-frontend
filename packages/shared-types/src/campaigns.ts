@@ -2,6 +2,7 @@ export interface TrackSummary {
   id: string;
   title: string;
   artist: string;
+  media_id: string;
   thumbnail_url: string | null;
 }
 

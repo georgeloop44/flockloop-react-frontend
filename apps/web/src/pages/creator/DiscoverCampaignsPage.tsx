@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useEffect, Suspense } from "react";
-import { useCampaigns, tracksApi, mediaApi } from "@flockloop/api-client";
+import { useCampaigns, mediaApi } from "@flockloop/api-client";
 import { useAudioStore, setSkipCallbacks, audioLoadAndPlay } from "@flockloop/audio-state";
 import type { CampaignRead } from "@flockloop/shared-types";
 import type { AudioTrack } from "@flockloop/audio-state";
@@ -15,7 +15,7 @@ function campaignToAudioTrack(campaign: CampaignRead): AudioTrack {
     title: campaign.track.title,
     artist: campaign.track.artist,
     thumbnailUrl: campaign.track.thumbnail_url,
-    mediaId: campaign.track_id,
+    mediaId: campaign.track.media_id,
   };
 }
 
@@ -69,8 +69,7 @@ function DiscoverContent() {
     async (campaign: CampaignRead) => {
       setSelectedId(campaign.id);
       try {
-        const track = await tracksApi.get(campaign.track.id);
-        const { download_url } = await mediaApi.getDownloadUrl(track.media_id);
+        const { download_url } = await mediaApi.getDownloadUrl(campaign.track.media_id);
         audioLoadAndPlay(campaignToAudioTrack(campaign), download_url);
       } catch {
         toast.error("Failed to load track. Please try again.");
