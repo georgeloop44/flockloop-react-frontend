@@ -1,0 +1,15 @@
+{
+  "name": "@flockloop/auth-store",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@flockloop/shared-types": "workspace:*",
+    "zustand": "^5.0.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  }
+}

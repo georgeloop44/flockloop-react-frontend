@@ -1,0 +1,16 @@
+{
+  "extends": "@flockloop/typescript-config/react.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@flockloop/shared-types": ["../../packages/shared-types/src/index.ts"],
+      "@flockloop/auth-store": ["../../packages/auth-store/src/index.ts"],
+      "@flockloop/api-client": ["../../packages/api-client/src/index.ts"],
+      "@flockloop/audio-state": ["../../packages/audio-state/src/index.ts"],
+      "@flockloop/tailwind-config": ["../../packages/tailwind-config/index.ts"]
+    },
+    "noEmit": true
+  },
+  "include": ["src", "vite-env.d.ts", "../../packages/*/src/**/*.ts"]
+}

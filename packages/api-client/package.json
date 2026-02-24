@@ -1,0 +1,17 @@
+{
+  "name": "@flockloop/api-client",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@flockloop/auth-store": "workspace:*",
+    "@flockloop/shared-types": "workspace:*",
+    "@tanstack/react-query": "^5.0.0",
+    "axios": "^1.7.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  }
+}

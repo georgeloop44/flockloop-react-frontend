@@ -1,0 +1,7 @@
+{
+  "extends": "@flockloop/typescript-config/react.json",
+  "compilerOptions": {
+    "outDir": "dist"
+  },
+  "include": ["src"]
+}

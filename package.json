@@ -1,0 +1,17 @@
+{
+  "private": true,
+  "name": "@flockloop/monorepo",
+  "scripts": {
+    "dev:web": "turbo dev --filter=@flockloop/web",
+    "dev:mobile": "turbo dev --filter=@flockloop/mobile",
+    "build:web": "turbo build --filter=@flockloop/web",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "clean": "turbo clean"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0",
+    "typescript": "^5.7.0"
+  },
+  "packageManager": "pnpm@9.15.0"
+}
