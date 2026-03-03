@@ -1,6 +1,6 @@
 import type { CampaignRead } from "@flockloop/shared-types";
 import { useAudioStore } from "@flockloop/audio-state";
-import { Play, Pause, Heart, MoreVertical, Plus } from "lucide-react";
+import { Play, Pause, Heart, MoreVertical, Plus, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface CampaignDetailPanelProps {
@@ -132,13 +132,24 @@ export function CampaignDetailPanel({
 
         {/* Actions */}
         <div className="flex shrink-0 flex-col gap-2">
+          {campaign.track.youtube_url ? (
+            <a
+              href={campaign.track.youtube_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-hover focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+            >
+              <ExternalLink className="h-4 w-4" aria-hidden="true" />
+              Create with this song
+            </a>
+          ) : null}
           <button
             type="button"
             onClick={() => onCreateAndEarn(campaign)}
             className="flex items-center gap-2 rounded-lg border border-border bg-surface-elevated px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-surface-hover focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
-            Create & Earn
+            Submit Content
           </button>
           <button
             type="button"

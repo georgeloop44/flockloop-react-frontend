@@ -1,4 +1,4 @@
-export type MediaType = "song" | "video" | "thumbnail";
+export type MediaType = "song" | "thumbnail";
 export type MediaStatus = "pending" | "ready" | "rejected";
 
 export interface UploadRequest {

@@ -1,9 +1,17 @@
-import { useState, useRef } from "react";
-import { useMediaUpload, useCreateSubmission } from "@flockloop/api-client";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useCreateSubmission, getErrorMessage } from "@flockloop/api-client";
 import { toast } from "sonner";
-import { Upload, X, FileVideo } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { X, Link } from "lucide-react";
 import { Dialog } from "@/components/ui/Dialog";
+import { youtubeUrlSchema } from "@/lib/youtube";
+
+const submitFormSchema = z.object({
+  youtube_url: youtubeUrlSchema,
+});
+
+type SubmitFormValues = z.infer<typeof submitFormSchema>;
 
 interface SubmitContentDialogProps {
   campaignId: string;
@@ -18,46 +26,43 @@ export function SubmitContentDialog({
   open,
   onClose,
 }: SubmitContentDialogProps) {
-  const [file, setFile] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const mediaUpload = useMediaUpload();
   const createSubmission = useCreateSubmission();
+  const isPending = createSubmission.isPending;
 
-  const isUploading = mediaUpload.isPending;
-  const isSubmitting = createSubmission.isPending;
-  const isPending = isUploading || isSubmitting;
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset: resetForm,
+  } = useForm<SubmitFormValues>({
+    resolver: zodResolver(submitFormSchema),
+  });
 
   const handleClose = () => {
     if (isPending) return;
-    setFile(null);
+    resetForm();
     onClose();
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files?.[0];
-    if (selected) setFile(selected);
-  };
-
-  const handleSubmit = async () => {
-    if (!file) return;
-
+  const onSubmit = async (formData: SubmitFormValues) => {
     try {
-      const media = await mediaUpload.mutateAsync({
-        file,
-        mediaType: "video",
-      });
-
       await createSubmission.mutateAsync({
         campaign_id: campaignId,
-        media_id: media.id,
+        youtube_url: formData.youtube_url,
       });
-
       toast.success("Submission created successfully");
-      setFile(null);
+      resetForm();
       onClose();
-    } catch {
-      toast.error("Failed to submit content. Please try again.");
+    } catch (err) {
+      const status = (err as { response?: { status?: number } })?.response
+        ?.status;
+      if (status === 403) {
+        toast.error(
+          "Connect your YouTube account in Settings before submitting.",
+        );
+      } else {
+        toast.error(`Submission failed: ${getErrorMessage(err)}`);
+      }
     }
   };
 
@@ -82,79 +87,58 @@ export function SubmitContentDialog({
       </div>
 
       <p className="mb-4 text-sm text-foreground-muted">
-        Upload a video for <span className="text-foreground">{campaignName}</span>
+        Submit a YouTube video for{" "}
+        <span className="text-foreground">{campaignName}</span>
       </p>
 
-      {/* File picker */}
-      <div
-        onClick={() => fileInputRef.current?.click()}
-        className={cn(
-          "flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors",
-          file
-            ? "border-primary/50 bg-primary/5"
-            : "border-border hover:border-foreground-muted",
-        )}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="video/*"
-          onChange={handleFileChange}
-          className="hidden"
-          aria-label="Select video file"
-        />
-        {file ? (
-          <>
-            <FileVideo className="h-8 w-8 text-primary" aria-hidden="true" />
-            <p className="mt-2 text-sm font-medium text-foreground">
-              {file.name}
-            </p>
-            <p className="text-xs text-foreground-muted">
-              {(file.size / (1024 * 1024)).toFixed(1)} MB
-            </p>
-          </>
-        ) : (
-          <>
-            <Upload className="h-8 w-8 text-foreground-muted" aria-hidden="true" />
-            <p className="mt-2 text-sm text-foreground-muted">
-              Click to select a video file
-            </p>
-          </>
-        )}
-      </div>
-
-      {/* Upload progress */}
-      {isUploading ? (
-        <div className="mt-4">
-          <div className="h-1.5 overflow-hidden rounded-full bg-surface-elevated">
-            <div
-              className="h-full rounded-full bg-primary transition-[width]"
-              style={{ width: `${mediaUpload.progress}%` }}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {/* YouTube URL */}
+        <div>
+          <label
+            htmlFor="submit-youtube-url"
+            className="mb-1.5 block text-sm text-foreground-secondary"
+          >
+            YouTube URL
+          </label>
+          <div className="relative">
+            <Link
+              className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-foreground-muted"
+              aria-hidden="true"
+            />
+            <input
+              id="submit-youtube-url"
+              type="url"
+              {...register("youtube_url")}
+              className="w-full rounded-lg border border-border bg-surface py-2 pr-3 pl-9 text-sm text-foreground placeholder:text-foreground-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+              placeholder="https://youtube.com/watch?v=..."
             />
           </div>
-          <p className="mt-1 text-xs text-foreground-muted">Uploading\u2026</p>
+          {errors.youtube_url ? (
+            <p className="mt-1 text-xs text-destructive">
+              {errors.youtube_url.message}
+            </p>
+          ) : null}
         </div>
-      ) : null}
 
-      {/* Actions */}
-      <div className="mt-6 flex justify-end gap-3">
-        <button
-          type="button"
-          onClick={handleClose}
-          disabled={isPending}
-          className="rounded-lg border border-border px-4 py-2 text-sm text-foreground-muted transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none disabled:opacity-50"
-        >
-          Cancel
-        </button>
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={!file || isPending}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-hover focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none disabled:opacity-50"
-        >
-          {isPending ? "Submitting\u2026" : "Submit"}
-        </button>
-      </div>
+        {/* Actions */}
+        <div className="flex justify-end gap-3 pt-2">
+          <button
+            type="button"
+            onClick={handleClose}
+            disabled={isPending}
+            className="rounded-lg border border-border px-4 py-2 text-sm text-foreground-muted transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isPending}
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-hover focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none disabled:opacity-50"
+          >
+            {isPending ? "Submitting\u2026" : "Submit"}
+          </button>
+        </div>
+      </form>
     </Dialog>
   );
 }

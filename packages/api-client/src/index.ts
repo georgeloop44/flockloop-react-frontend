@@ -9,6 +9,7 @@ export { campaignsApi } from "./endpoints/campaigns";
 export { tracksApi } from "./endpoints/tracks";
 export { submissionsApi } from "./endpoints/submissions";
 export { mediaApi } from "./endpoints/media";
+export { youtubeApi } from "./endpoints/youtube";
 
 // Query options factories
 export { authOptions } from "./hooks/use-auth";
@@ -17,6 +18,7 @@ export { trackOptions } from "./hooks/use-tracks";
 export { submissionOptions } from "./hooks/use-submissions";
 export { mediaOptions } from "./hooks/use-media";
 export { organisationOptions } from "./hooks/use-organisations";
+export { youtubeOptions } from "./hooks/use-youtube";
 
 // Auth hooks
 export {
@@ -58,3 +60,10 @@ export {
   useSendInvitation,
   useRevokeInvitation,
 } from "./hooks/use-organisations";
+
+// YouTube hooks
+export {
+  useYouTubeStatus,
+  useYouTubeAuthorize,
+  useYouTubeDisconnect,
+} from "./hooks/use-youtube";

@@ -1,13 +1,14 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuthStore, selectIsCreator, selectIsManager } from "@flockloop/auth-store";
 import { useLogout } from "@flockloop/api-client";
-import { Music, Eye, Send, LayoutDashboard, LogOut, Disc3 } from "lucide-react";
+import { Music, Eye, Send, LayoutDashboard, LogOut, Disc3, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Hoist static data outside component (React best practice)
 const creatorLinks = [
   { to: "/discover", label: "Discover", icon: Music },
   { to: "/my-submissions", label: "My Submissions", icon: Send },
+  { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
 const managerLinks = [
