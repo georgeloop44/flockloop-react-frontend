@@ -5,13 +5,20 @@ import { Coins } from "lucide-react";
 const pageTitles: Record<string, string> = {
   "/discover": "Discover Campaigns",
   "/my-submissions": "My Submissions",
+  "/settings": "Settings",
   "/overview": "Overview",
   "/campaigns": "My Campaigns",
 };
 
+function getPageTitle(pathname: string): string {
+  if (pageTitles[pathname]) return pageTitles[pathname];
+  if (pathname.startsWith("/campaigns/")) return "Submissions";
+  return "FlockLoop";
+}
+
 export function TopBar() {
   const location = useLocation();
-  const title = pageTitles[location.pathname] ?? "FlockLoop";
+  const title = getPageTitle(location.pathname);
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b border-border-subtle px-6">

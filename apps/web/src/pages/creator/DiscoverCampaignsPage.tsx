@@ -7,6 +7,7 @@ import type { ColumnFiltersState } from "@tanstack/react-table";
 import { CampaignTable } from "@/components/campaigns/CampaignTable";
 import { CampaignDetailPanel } from "@/components/campaigns/CampaignDetailPanel";
 import { CampaignFilters } from "@/components/campaigns/CampaignFilters";
+import { SubmitContentDialog } from "@/components/submissions/SubmitContentDialog";
 import { toast } from "sonner";
 
 function campaignToAudioTrack(campaign: CampaignRead): AudioTrack {
@@ -114,8 +115,10 @@ function DiscoverContent() {
     [currentTrackId, isPlaying, pause, resume, fetchAndPlay],
   );
 
-  const handleCreateAndEarn = useCallback((_campaign: CampaignRead) => {
-    // TODO: Open SubmitContentDialog
+  const [submitCampaign, setSubmitCampaign] = useState<CampaignRead | null>(null);
+
+  const handleCreateAndEarn = useCallback((campaign: CampaignRead) => {
+    setSubmitCampaign(campaign);
   }, []);
 
   const handleSkip = useCallback(() => {
@@ -158,6 +161,16 @@ function DiscoverContent() {
           columnFilters={columnFilters}
         />
       </div>
+
+      {/* Submit content dialog */}
+      {submitCampaign ? (
+        <SubmitContentDialog
+          campaignId={submitCampaign.id}
+          campaignName={submitCampaign.name}
+          open={!!submitCampaign}
+          onClose={() => setSubmitCampaign(null)}
+        />
+      ) : null}
     </div>
   );
 }

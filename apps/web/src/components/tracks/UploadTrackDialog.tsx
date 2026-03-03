@@ -4,13 +4,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMediaUpload, useCreateTrack, getErrorMessage } from "@flockloop/api-client";
 import { toast } from "sonner";
-import { X, Upload, Music, ImagePlus } from "lucide-react";
+import { X, Upload, Music, ImagePlus, Link } from "lucide-react";
+import { youtubeUrlSchema } from "@/lib/youtube";
 import { cn } from "@/lib/utils";
 import { Dialog } from "@/components/ui/Dialog";
 
 const trackFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   artist: z.string().min(1, "Artist is required"),
+  youtube_url: youtubeUrlSchema,
 });
 
 type TrackFormValues = z.infer<typeof trackFormSchema>;
@@ -100,6 +102,7 @@ export function UploadTrackDialog({ open, onClose }: UploadTrackDialogProps) {
       await createTrack.mutateAsync({
         title: formData.title,
         artist: formData.artist,
+        youtube_url: formData.youtube_url,
         media_id: audioMediaId,
         thumbnail_id: thumbnailId,
       });
@@ -257,6 +260,29 @@ export function UploadTrackDialog({ open, onClose }: UploadTrackDialogProps) {
                 />
               </div>
             </div>
+          ) : null}
+        </div>
+
+        {/* YouTube URL */}
+        <div>
+          <label htmlFor="track-youtube-url" className="mb-1.5 block text-sm text-foreground-secondary">
+            YouTube URL
+          </label>
+          <div className="relative">
+            <Link
+              className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-foreground-muted"
+              aria-hidden="true"
+            />
+            <input
+              id="track-youtube-url"
+              type="url"
+              {...register("youtube_url")}
+              className="w-full rounded-lg border border-border bg-surface py-2 pr-3 pl-9 text-sm text-foreground placeholder:text-foreground-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+              placeholder="https://youtube.com/watch?v=..."
+            />
+          </div>
+          {errors.youtube_url ? (
+            <p className="mt-1 text-xs text-destructive">{errors.youtube_url.message}</p>
           ) : null}
         </div>
 

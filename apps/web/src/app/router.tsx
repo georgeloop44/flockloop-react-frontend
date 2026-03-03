@@ -24,11 +24,15 @@ const DiscoverCampaignsPage = lazy(
 const MySubmissionsPage = lazy(
   () => import("@/pages/creator/MySubmissionsPage"),
 );
+const SettingsPage = lazy(() => import("@/pages/creator/SettingsPage"));
 const OverviewPage = lazy(() => import("@/pages/manager/OverviewPage"));
 const MyCampaignsPage = lazy(
   () => import("@/pages/manager/MyCampaignsPage"),
 );
 const MyTracksPage = lazy(() => import("@/pages/manager/MyTracksPage"));
+const CampaignSubmissionsPage = lazy(
+  () => import("@/pages/manager/CampaignSubmissionsPage"),
+);
 
 function PageSkeleton() {
   return (
@@ -115,6 +119,17 @@ export const router = createBrowserRouter([
         ),
         errorElement: <RouteErrorBoundary />,
       },
+      {
+        path: "settings",
+        element: (
+          <RoleGate allowedRole="content_creator">
+            <Suspense fallback={<PageSkeleton />}>
+              <SettingsPage />
+            </Suspense>
+          </RoleGate>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
       // Manager routes
       {
         path: "overview",
@@ -133,6 +148,17 @@ export const router = createBrowserRouter([
           <RoleGate allowedRole="campaign_manager">
             <Suspense fallback={<PageSkeleton />}>
               <MyCampaignsPage />
+            </Suspense>
+          </RoleGate>
+        ),
+        errorElement: <RouteErrorBoundary />,
+      },
+      {
+        path: "campaigns/:id",
+        element: (
+          <RoleGate allowedRole="campaign_manager">
+            <Suspense fallback={<PageSkeleton />}>
+              <CampaignSubmissionsPage />
             </Suspense>
           </RoleGate>
         ),

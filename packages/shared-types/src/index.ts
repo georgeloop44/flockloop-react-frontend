@@ -42,3 +42,5 @@ export type {
   MediaRead,
   DownloadResponse,
 } from "./media";
+
+export type { YouTubeAuthorizeResponse, YouTubeStatus } from "./youtube";

@@ -1,4 +1,5 @@
 import { Suspense, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useCampaigns, useCreateCampaign, useTracks } from "@flockloop/api-client";
 import type { CampaignRead } from "@flockloop/shared-types";
 import { Plus, X, Inbox } from "lucide-react";
@@ -16,13 +17,17 @@ const createCampaignSchema = z.object({
 type CreateCampaignForm = z.infer<typeof createCampaignSchema>;
 
 function CampaignRow({ campaign }: { campaign: CampaignRead }) {
+  const navigate = useNavigate();
   const subsLeft =
     campaign.max_submissions !== undefined
       ? campaign.max_submissions - (campaign.submissions_count ?? 0)
       : null;
 
   return (
-    <tr className="border-b border-border-subtle transition-colors hover:bg-surface-hover">
+    <tr
+      onClick={() => navigate(`/campaigns/${campaign.id}`)}
+      className="cursor-pointer border-b border-border-subtle transition-colors hover:bg-surface-hover"
+    >
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
           {campaign.track.thumbnail_url ? (
